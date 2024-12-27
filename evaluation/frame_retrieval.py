@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 
 def retrieval_ap_at_k(video_len_list, video_paths, embeddings, labels, k_list, cross_view):
+    # video len is a list contains the length of each video
     dim = 2 if cross_view else 1
     ap = np.zeros((len(k_list), dim))
     num_queries = np.zeros((len(k_list), dim))
@@ -18,7 +19,7 @@ def retrieval_ap_at_k(video_len_list, video_paths, embeddings, labels, k_list, c
         video_len = video_len_list[i]
         is_ego = True if 'ego' in video_file else False
         for frameid in range(cur_idx, cur_idx + video_len):
-            frameid2videoid[frameid] = [i, is_ego, frameid - cur_idx]
+            frameid2videoid[frameid] = [i, is_ego, frameid - cur_idx] # [video_id, is_ego, frame_id_in_video]
         cur_idx = cur_idx + video_len
 
     for i in tqdm(range(embeddings.shape[0])):
@@ -75,3 +76,14 @@ def frame_retrieval(save_path, video_len_list, video_paths):
     regular = retrieval_ap_at_k(video_len_list, video_paths, val_embs, val_labels, [10], cross_view=False)
     ego2exo, exo2ego = retrieval_ap_at_k(video_len_list, video_paths, val_embs, val_labels, [10], cross_view=True)
     return regular, ego2exo, exo2ego
+
+if __name__ == '__main__':
+    label_path = "/checkpoint/romyluo/AlignEgoExo/data/val_label.npy"
+    # show the shape of the label
+    labels = np.load(label_path)
+    print(labels)
+    print(labels.shape) # (2930,)
+
+    embeds_path = "/checkpoint/romyluo/AlignEgoExo/data/val_embeds.npy"
+    embeds = np.load(embeds_path)
+    print(embeds.shape) # (2930, 128)
